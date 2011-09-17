@@ -1,0 +1,9 @@
+{
+    "license": "WTFPL",
+    "author": "Jorge Gallegos <kad@blegh.net>",
+    "maintainer": "Jorge Gallegos <kad@blegh.net>",
+    "version": "0.1",
+    "source": "git://github.com/thekad/puppet-module-library.git",
+    "project_page": "http://github.com/thekad/puppet-module-library",
+    "summary": "Puppet module for managing scripting libraries."
+}
