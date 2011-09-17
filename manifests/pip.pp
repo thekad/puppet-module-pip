@@ -3,6 +3,8 @@
 
 define library::pip ($ensure='present', $package='', $virtualenv='') {
 
+    include library
+
     $pkg = $package ? {
         ''      => $name,
         default => $package,
@@ -13,10 +15,7 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
         default => "${virtualenv}::${pkg}",
     }
 
-    package {
-        $library::pip_requires:
-            ensure => installed;
-    }
+    Package <| tag == 'pip' |>
 
     Exec {
         logoutput => on_failure,
@@ -32,7 +31,7 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
             "virtualenv::setup::${virtualenv}":
                 command => "virtualenv --no-site-packages ${virtualenv}",
                 creates => "${virtualenv}/bin/pip",
-                require => Package[$library::pip_requires];
+                require => Package['python-virtualenv'];
         }
         $pip_program = "${virtualenv}/bin/pip"
     } else {
@@ -50,16 +49,19 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
 
     exec {
         "pip::${full_name}::${ensure}":
-            command  => $command,
-            unless   => $ensure ? {
+            command => $command,
+            unless  => $ensure ? {
                 /(present|installed)/ => $check_version,
                 default               => undef,
             },
-            onlyif   => $ensure ? {
+            onlyif  => $ensure ? {
                 /(absent|purged)/ => $check_version,
                 default           => undef,
             },
-            loglevel => notice,
+            require => $virtualenv ? {
+                ''      => Package['python-pip'],
+                default => Exec["virtualenv::setup::${virtualenv}"],
+            },
     }
 }
 

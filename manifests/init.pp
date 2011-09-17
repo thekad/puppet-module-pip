@@ -8,17 +8,30 @@ class library {
         /(Fedora|CentOS)/ => '/usr/bin/pip-python',
     }
 
-    $pip_requires = $operatingsystem ? {
-        /(Ubuntu|Debian)/ => [
-            'python-dev',
-            'python-virtualenv',
-            'python-pip',
-        ],
-        /(Fedora|CentOS)/ => [
-            'python-devel',
-            'python-virtualenv',
-            'python-pip',
-        ],
+    @package {
+        'python-virtualenv':
+            ensure => present,
+            tag    => 'pip';
+        'python-pip':
+            ensure => present,
+            tag    => 'pip';
+    }
+
+    case $operatingsystem {
+        /(Ubuntu|Debian)/: {
+            @package {
+                'python-dev':
+                    ensure => present,
+                    tag    => 'pip';
+            }
+        }
+        /(Fedora|CentOS)/: {
+            @package {
+                'python-devel':
+                    ensure => present,
+                    tag    => 'pip';
+            }
+        }
     }
 }
 
