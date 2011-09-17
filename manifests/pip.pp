@@ -27,11 +27,13 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
     }
 
     if $virtualenv {
-        exec {
-            "virtualenv::setup::${virtualenv}":
-                command => "virtualenv --no-site-packages ${virtualenv}",
-                creates => "${virtualenv}/bin/pip",
-                require => Package['python-virtualenv'];
+        if !defined(Exec["virtualenv::setup::${virtualenv}"]) {
+            exec {
+                "virtualenv::setup::${virtualenv}":
+                    command => "virtualenv --no-site-packages ${virtualenv}",
+                    creates => "${virtualenv}/bin/pip",
+                    require => Package['python-virtualenv'];
+            }
         }
         $pip_program = "${virtualenv}/bin/pip"
     } else {
@@ -52,6 +54,7 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
             command => $command,
             unless  => $ensure ? {
                 /(present|installed)/ => $check_version,
+                /\d+.*/               => $check_version,
                 default               => undef,
             },
             onlyif  => $ensure ? {
