@@ -20,13 +20,15 @@ Python
 
 Example usage:
 
-    include library
-
     library::pip {
         'bottle':
             ensure     => installed,
-            version    => '0.9.6',
             virtualenv => '/usr/local/virtualenvs/proj1',
+        'Django':
+            ensure     => latest,
+            virtualenv => '/usr/local/virtualens/proj1',
+        'flask':
+            ensure => '0.7.2';
     }
 
 
