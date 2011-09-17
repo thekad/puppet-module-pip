@@ -1,7 +1,7 @@
 # -*- mode: puppet; sh-basic-offset: 4; indent-tabs-mode: nil; coding: utf-8 -*-
 # vim: tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8
 
-define library::pip ($ensure='present', $package='', $virtualenv='', $version='') {
+define library::pip ($ensure='present', $package='', $virtualenv='') {
 
     $pkg = $package ? {
         ''      => $name,
@@ -9,14 +9,8 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
     }
 
     $full_name = $virtualenv ? {
-        ''      => $version ? {
-            ''      => $pkg,
-            default => "${pkg}==${version}",
-        },
-        default => $version ? {
-            ''      => "${virtualenv}::${pkg}",
-            default => "${virtualenv}::${pkg}==${version}",
-        }
+        ''      => $pkg,
+        default => "${virtualenv}::${pkg}",
     }
 
     package {
@@ -28,9 +22,9 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
         logoutput => on_failure,
     }
 
-    $pkg_regex = $version ? {
-        ''      => shellquote("^${pkg}=="),
-        default => shellquote("^${pkg}==${version}$"),
+    $pkg_regex = $ensure ? {
+        /(present|installed|purged|absent|latest)/ => shellquote("^${pkg}=="),
+        default                                    => shellquote("^${pkg}==${ensure}$"),
     }
 
     if $virtualenv {
@@ -47,36 +41,25 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
         $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
     }
 
-    case $ensure {
-        'absent', 'purged': {
-            $command = "${pip_program} uninstall ${pkg}"
-        }
-        'present', 'installed': {
-            $command = $version ? {
-                ''      => "${pip_program} install -M ${pkg}",
-                default => "${pip_program} install -M ${pkg}==${version}",
-            }
-        }
-        'latest': {
-            $command = "${pip_program} install -M -U ${pkg}"
-        }
-        default : {
-            err("Invalid value for ensure (version has its own parameter): ${ensure}")
-            fail('Invalid value for ensure')
-        }
+    $command = $ensure ? {
+        /(absent|purged)/     => "${pip_program} uninstall -y ${pkg}",
+        /(present|installed)/ => "${pip_program} install -M ${pkg}",
+        'latest'              => "${pip_program} install -M -U ${pkg}",
+        default               => "${pip_program} install -M ${pkg}==${ensure}",
     }
 
     exec {
-        "pip::${full_name}":
-            command => $command,
-            unless  => $ensure ? {
+        "pip::${full_name}::${ensure}":
+            command  => $command,
+            unless   => $ensure ? {
                 /(present|installed)/ => $check_version,
                 default               => undef,
             },
-            onlyif  => $ensure ? {
+            onlyif   => $ensure ? {
                 /(absent|purged)/ => $check_version,
                 default           => undef,
             },
+            loglevel => notice,
     }
 }
 
