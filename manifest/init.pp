@@ -1,4 +1,4 @@
-class library::base {
+class library {
 
     $pip_program = $operatingsystem ? {
         /(Ubuntu|Debian)/ => '/usr/bin/pip',
