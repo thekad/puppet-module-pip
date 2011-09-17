@@ -9,17 +9,19 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
     }
 
     $full_name = $virtualenv ? {
-        ''      => $pkg,
-        default => "${virtualenv}::${pkg}"
+        ''      => $version ? {
+            ''      => $pkg,
+            default => "${pkg}==${version}",
+        },
+        default => $version ? {
+            ''      => "${virtualenv}::${pkg}",
+            default => "${virtualenv}::${pkg}==${version}",
+        }
     }
 
     package {
         $library::pip_requires:
-            ensure => installed,
-            before => $virtualenv ? {
-                ''      => undef,
-                default => Exec["virtualenv::setup::${virtualenv}"],
-            }
+            ensure => installed;
     }
 
     Exec {
@@ -35,7 +37,8 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
         exec {
             "virtualenv::setup::${virtualenv}":
                 command => "virtualenv --no-site-packages ${virtualenv}",
-                creates => "${virtualenv}/bin/pip";
+                creates => "${virtualenv}/bin/pip",
+                require => Package[$library::pip_requires];
         }
         $pip_program = "${virtualenv}/bin/pip"
         $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
@@ -49,7 +52,13 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
             $command = "${pip_program} uninstall ${pkg}"
         }
         'present', 'installed': {
-            $command = "${pip_program} install ${pkg}"
+            $command = $version ? {
+                ''      => "${pip_program} install -M ${pkg}",
+                default => "${pip_program} install -M ${pkg}==${version}",
+            }
+        }
+        'latest': {
+            $command = "${pip_program} install -M -U ${pkg}"
         }
         default : {
             err("Invalid value for ensure (version has its own parameter): ${ensure}")
@@ -58,7 +67,7 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
     }
 
     exec {
-        "pip::exec::${full_name}":
+        "pip::${full_name}":
             command => $command,
             unless  => $ensure ? {
                 /(present|installed)/ => $check_version,
