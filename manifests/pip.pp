@@ -35,11 +35,11 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
                 require => Package[$library::pip_requires];
         }
         $pip_program = "${virtualenv}/bin/pip"
-        $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
     } else {
         $pip_program = "${library::pip_program}"
-        $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
     }
+
+    $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
 
     $command = $ensure ? {
         /(absent|purged)/     => "${pip_program} uninstall -y ${pkg}",
