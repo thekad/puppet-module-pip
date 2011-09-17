@@ -24,7 +24,7 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
     }
 
     $pkg_regex = $version ? {
-        ''      => shellquote("^$pkg=="),
+        ''      => shellquote("^${pkg}=="),
         default => shellquote("^${pkg}==${version}$"),
     }
 
@@ -35,10 +35,10 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $version=''
                 creates => "${virtualenv}/bin/pip";
         }
         $pip_program = "${virtualenv}/bin/pip"
-        $check_version = "${pip_program} -q freeze 2>/dev/null | grep -i ${pkg_regex} | cut -d= -f 3"
+        $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
     } else {
         $pip_program = "${library::pip_program}"
-        $check_version = "${pip_program} -q freeze 2>/dev/null | grep -i ${pkg_regex} | cut -d= -f 3"
+        $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
     }
 
     case $ensure {
