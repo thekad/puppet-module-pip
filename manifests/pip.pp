@@ -1,9 +1,14 @@
 # -*- mode: puppet; sh-basic-offset: 4; indent-tabs-mode: nil; coding: utf-8 -*-
 # vim: tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8
 
-define library::pip ($ensure='present', $package='', $virtualenv='') {
+define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='') {
 
     include library
+
+    if $package and $vcsurl {
+        err('You have to specify package or vcsurl, not both')
+        fail('You have to specify package or vcsurl')
+    }
 
     $pkg = $package ? {
         ''      => $name,
@@ -21,9 +26,12 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
         logoutput => on_failure,
     }
 
-    $pkg_regex = $ensure ? {
-        /(present|installed|purged|absent|latest)/ => shellquote("^${pkg}=="),
-        default                                    => shellquote("^${pkg}==${ensure}$"),
+    $pkg_regex = $vcsurl ? {
+        ''      => $ensure ? {
+            /(present|installed|purged|absent|latest)/ => shellquote("^${pkg}=="),
+            default                                    => shellquote("^${pkg}==${ensure}$"),
+        },
+        default => "^${pkg}==",
     }
 
     if $virtualenv {
@@ -42,11 +50,17 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
 
     $check_version = "${pip_program} -q freeze 2>/dev/null | /bin/grep -iq ${pkg_regex}"
 
-    $command = $ensure ? {
-        /(absent|purged)/     => "${pip_program} uninstall -y ${pkg}",
-        /(present|installed)/ => "${pip_program} install -M ${pkg}",
-        'latest'              => "${pip_program} install -M -U ${pkg}",
-        default               => "${pip_program} install -M -I ${pkg}==${ensure}",
+    $command = $vcsurl ? {
+        ''      => $ensure ? {
+            /(absent|purged)/     => "${pip_program} uninstall -y ${pkg}",
+            /(present|installed)/ => "${pip_program} install -M ${pkg}",
+            'latest'              => "${pip_program} install -M -U ${pkg}",
+            default               => "${pip_program} install -M -I ${pkg}==${ensure}",
+        },
+        default => $ensure ? {
+            /(absent|purged)/ => "${pip_program} uninstall -y ${pkg}",
+            default           => "${pip_program} install -e ${vcsurl}",
+        },
     }
 
     exec {
