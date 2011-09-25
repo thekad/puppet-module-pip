@@ -1,7 +1,7 @@
 # -*- mode: puppet; sh-basic-offset: 4; indent-tabs-mode: nil; coding: utf-8 -*-
 # vim: tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8
 
-define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='') {
+define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='', $extraindex='') {
 
     include library
 
@@ -18,6 +18,11 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='')
     $full_name = $virtualenv ? {
         ''      => $pkg,
         default => "${virtualenv}::${pkg}",
+    }
+
+    $extra = $extraindex ? {
+        ''      => '',
+        default => "--extra-index-url='${extraindex}'",
     }
 
     Package <| tag == 'pip' |>
@@ -53,9 +58,9 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='')
     $command = $vcsurl ? {
         ''      => $ensure ? {
             /(absent|purged)/     => "${pip_program} uninstall -y ${pkg}",
-            /(present|installed)/ => "${pip_program} install -M ${pkg}",
-            'latest'              => "${pip_program} install -M -U ${pkg}",
-            default               => "${pip_program} install -M -I ${pkg}==${ensure}",
+            /(present|installed)/ => "${pip_program} install ${extra} -M ${pkg}",
+            'latest'              => "${pip_program} install ${extra} -M -U ${pkg}",
+            default               => "${pip_program} install ${extra} -M -I ${pkg}==${ensure}",
         },
         default => $ensure ? {
             /(absent|purged)/ => "${pip_program} uninstall -y ${pkg}",
