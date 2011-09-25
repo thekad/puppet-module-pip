@@ -40,13 +40,13 @@ define library::pip ($ensure='present', $package='', $virtualenv='') {
         $pip_program = "${library::pip_program}"
     }
 
-    $check_version = "${pip_program} -q freeze 2>/dev/null | grep -iq ${pkg_regex}"
+    $check_version = "${pip_program} -q freeze 2>/dev/null | /bin/grep -iq ${pkg_regex}"
 
     $command = $ensure ? {
         /(absent|purged)/     => "${pip_program} uninstall -y ${pkg}",
         /(present|installed)/ => "${pip_program} install -M ${pkg}",
         'latest'              => "${pip_program} install -M -U ${pkg}",
-        default               => "${pip_program} install -M ${pkg}==${ensure}",
+        default               => "${pip_program} install -M -I ${pkg}==${ensure}",
     }
 
     exec {
