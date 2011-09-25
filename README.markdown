@@ -10,15 +10,19 @@ Planned:
 * PEAR packages
 * gems (maybe? via RVM)
 
+
 Install
 -------
 
 Install in `<module_path>/library`
 
-Python
-------
+
+Python (pip)
+------------
 
 Example usage:
+
+    include library
 
     library::pip {
         'bottle':
@@ -29,6 +33,33 @@ Example usage:
             virtualenv => '/usr/local/virtualens/proj1',
         'flask':
             ensure => '0.7.2';
+    }
+
+
+PHP (PEAR)
+----------
+
+Example usage:
+
+    package {
+        'php-mbstring':
+            ensure => installed;
+    }
+
+    include library
+
+    library::pear {
+        'Proj1::Archive_Zip':
+            package  => 'Archive_Zip',
+            ensure   => latest,
+            localdir => '/var/www/sites/proj1/pear',
+        'File_Mogile':
+            ensure   => '0.2.0',
+            localdir => '/var/www/sites/proj1/pear',
+            require  => Package['php-mbstring'];
+        'System::Archive_Zip':
+            package  => 'Archive_Zip',
+            ensure   => absent;
     }
 
 
