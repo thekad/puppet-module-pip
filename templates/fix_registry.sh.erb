@@ -1,0 +1,15 @@
+#!/bin/bash
+# Fixing registry in <%= localdir %>/.pearrc
+
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set bin_dir      <%= localdir -%>/bin
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set doc_dir      <%= localdir -%>/docs
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set ext_dir      <%= localdir -%>/ext
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set php_dir      <%= localdir -%>/php
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set cache_dir    <%= localdir -%>/cache
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set cfg_dir      <%= localdir -%>/cfg
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set data_dir     <%= localdir -%>/data
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set download_dir <%= localdir -%>/download
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set temp_dir     <%= localdir -%>/temp
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set test_dir     <%= localdir -%>/tests
+<%= scope.lookupvar("library::pear_program") %> -c <%= localdir -%>/.pearrc config-set www_dir      <%= localdir -%>/www
+
