@@ -3,8 +3,6 @@
 
 define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='', $extraindex='') {
 
-    include library
-
     if $package and $vcsurl {
         err('You have to specify package or vcsurl, not both')
         fail('You have to specify package or vcsurl')
@@ -69,7 +67,7 @@ define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='',
     }
 
     exec {
-        "pip::${full_name}::${ensure}":
+        "${full_name}::${ensure}":
             command => $command,
             unless  => $ensure ? {
                 /(present|installed)/ => $check_version,
