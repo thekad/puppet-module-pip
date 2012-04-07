@@ -1,7 +1,7 @@
 # -*- mode: puppet; sh-basic-offset: 4; indent-tabs-mode: nil; coding: utf-8 -*-
 # vim: tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8
 
-define library::pip ($ensure='present', $package='', $virtualenv='', $vcsurl='', $extraindex='') {
+define pip::lib ($ensure='present', $package='', $virtualenv='', $vcsurl='', $extraindex='') {
 
     if $package and $vcsurl {
         err('You have to specify package or vcsurl, not both')

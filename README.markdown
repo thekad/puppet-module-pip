@@ -15,9 +15,9 @@ Python (pip)
 
 Example usage:
 
-    include library
+    include pip
 
-    library::pip {
+    pip::lib {
         'bottle':
             ensure     => installed,
             virtualenv => '/usr/local/virtualenvs/proj1',
