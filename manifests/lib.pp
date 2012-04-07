@@ -48,7 +48,7 @@ define pip::lib ($ensure='present', $package='', $virtualenv='', $vcsurl='', $ex
         }
         $pip_program = "${virtualenv}/bin/pip"
     } else {
-        $pip_program = "${library::pip_program}"
+        $pip_program = "${pip::pip_program}"
     }
 
     $check_version = "${pip_program} -q freeze 2>/dev/null | /bin/grep -iq ${pkg_regex}"
