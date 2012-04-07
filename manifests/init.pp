@@ -8,8 +8,6 @@ class library {
         /(Fedora|CentOS)/ => '/usr/bin/pip-python',
     }
 
-    $pear_program = '/usr/bin/pear'
-
     @package {
         'python-virtualenv':
             ensure => present,
@@ -17,9 +15,6 @@ class library {
         'python-pip':
             ensure => present,
             tag    => 'pip';
-        'php-pear':
-            ensure => present,
-            tag    => 'pear';
     }
 
     case $operatingsystem {
